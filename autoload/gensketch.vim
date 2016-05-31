@@ -23,8 +23,12 @@ function gensketch#Edit(parameters)
     " TODO 当未提供目标名的时候，应该以当前文件夹名，为参数来提供……
     "let cmd = "genQtSketch qt/". a:root . " " . a:target . " " . l:out
     let path = system("genQtSketch --edit " . a:parameters)
+    let dir_cmd = "e"
+    if exists(":NERDTree") > 0
+        let dir_cmd ="NERDTree" 
+    endif
     if len(path) > 0
-        silent execute "NERDTree " . path
+        silent execute dir_cmd . path
         echomsg "Open dir: " . a:parameters
     else
         echomsg a:parameters . " wrong parameter!"
