@@ -19,3 +19,8 @@
 `:GenSketch qt/QObject MyQtUnit`
  - 目的，在当前路径下创建 MyQtUnit.cpp 和 MyQtUnit.h 两个文件。
  - 调用 $GenSketch-template/qc/QObject.tpl 下的脚本，并将“Taget=MyQtUnit”，作为变量，传递给该文件夹下的脚本。
+
+----------------------------------------------------------------------
+
+`:GenSketchEdit qt/QObject`
+ - 目的，编辑sketch工程 $GenSketch-template/qc/QObject.tpl
