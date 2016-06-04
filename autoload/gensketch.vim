@@ -25,7 +25,7 @@ function gensketch#Edit(parameters)
     let path = system("genQtSketch --edit " . a:parameters)
     let dir_cmd = "e"
     if exists(":NERDTree") > 0
-        let dir_cmd ="NERDTree" 
+        let dir_cmd = "NERDTree"
     endif
     if len(path) > 0
         silent execute dir_cmd . path
@@ -44,6 +44,24 @@ endfunction
 
 function gensketch#CompletsListUpdate()
     let g:gensketchCompletList = split(system("genQtSketch --list"), "\n")
-    " let g:gensketchCompletList = split(globpath("/home/sarrow/project/genQtSketch/template/qt", '*'), "\n")
-    " call map(g:gensketchCompletList, 'fnamemodify(v:val, ":t:r")')
 endfunction
+
+function gensketch#Help(parameters)
+    " NOTE
+    " 新开一个buffer，并将帮助文档，设置为md风格，并显示出来。
+    " NOTE new 的时候，附带名字，即可设置buffer的名字；
+    " 暂时使用空白……
+    if !bufexists('gensketchHelp')
+        new gensketchHelp
+    else
+	exe bufwinnr(bufnr('gensketchHelp')).'wincmd w'
+    endif
+    setfiletype markdown
+    setlocal modifiable
+    silent %delete _
+    let content = split(system("genQtSketch --help " . a:parameters), '\n')
+    silent 0put = content
+    let &modified=0
+    setlocal nomodifiable
+endfunction
+
