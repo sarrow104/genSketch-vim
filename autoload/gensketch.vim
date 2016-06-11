@@ -13,16 +13,16 @@ endfunction
 " /usr/share/vim/vim74/doc/usr_41.txt|1034
 function gensketch#Call(parameters)
     " TODO 当未提供目标名的时候，应该以当前文件夹名，为参数来提供……
-    "let cmd = "genQtSketch qt/". a:root . " " . a:target . " " . l:out
-    let cmd = "genQtSketch " . a:parameters
+    "let cmd = "genSketch qt/". a:root . " " . a:target . " " . l:out
+    let cmd = "genSketch " . a:parameters
     echomsg cmd
     silent execute "!".cmd
 endfunction
 
 function gensketch#Edit(parameters)
     " TODO 当未提供目标名的时候，应该以当前文件夹名，为参数来提供……
-    "let cmd = "genQtSketch qt/". a:root . " " . a:target . " " . l:out
-    let path = system("genQtSketch --edit " . a:parameters)
+    "let cmd = "genSketch qt/". a:root . " " . a:target . " " . l:out
+    let path = system("genSketch --edit " . a:parameters)
     let dir_cmd = "e"
     if exists(":NERDTree") > 0
         let dir_cmd = "NERDTree"
@@ -43,7 +43,7 @@ function gensketch#GetCompletsList()
 endfunction
 
 function gensketch#CompletsListUpdate()
-    let g:gensketchCompletList = split(system("genQtSketch --list"), "\n")
+    let g:gensketchCompletList = split(system("genSketch --list"), "\n")
 endfunction
 
 function gensketch#Help(parameters)
@@ -59,7 +59,7 @@ function gensketch#Help(parameters)
     setfiletype markdown
     setlocal modifiable
     silent %delete _
-    let content = split(system("genQtSketch --help " . a:parameters), '\n')
+    let content = split(system("genSketch --help " . a:parameters), '\n')
     silent 0put = content
     let &modified=0
     setlocal nomodifiable
