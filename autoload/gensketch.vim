@@ -9,14 +9,26 @@ function gensketch#CompleteRoot(A, L, P)
     return flist
 endfunction
 
-" NOTE 不定参数见：
+" NOTE: 不定参数见：
 " /usr/share/vim/vim74/doc/usr_41.txt|1034
 function gensketch#Call(parameters)
     " TODO 当未提供目标名的时候，应该以当前文件夹名，为参数来提供……
-    "let cmd = "genSketch qt/". a:root . " " . a:target . " " . l:out
-    let cmd = "genSketch " . a:parameters
+    let cmd = "genSketch " . join(a:parameters, ' ')
     echomsg cmd
-    silent execute "!".cmd
+    let outputs = system(cmd)
+    let default_file = ""
+    for line in split(outputs, "\n")
+        if line =~ "^default-file="
+            let default_file = strpart(line, 13)
+            break
+        endif
+    endfor
+    if filereadable(default_file)
+        silent execute "edit " . fnameescape(default_file)
+        if len(a:parameters) >= 3
+            silent execute "NERDTree " . fnameescape(a:parameters[2])
+        endif
+    endif
 endfunction
 
 function gensketch#Edit(parameters)
