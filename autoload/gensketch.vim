@@ -25,7 +25,10 @@ endfunction
 function s:GetPreCommandArgs(ArgLead, CmdLine, CursorPos)
     let l:pre_cmd=a:CmdLine[0:a:CursorPos-len(a:ArgLead)-1]
     let l:pre_cmd=substitute(l:pre_cmd, '\s*$', '', 'g')
-    return split(l:pre_cmd, ' \+')[1:]
+    let l:pre_cmd=split(l:pre_cmd, ' \+')[1:]
+    " filter-out -Dname=value option command
+    call filter(l:pre_cmd, 'match(v:val, "-D")!=0')
+    return l:pre_cmd
 endfunction
 
 " use template-name
@@ -38,7 +41,9 @@ function gensketch#CommandGenComplete(ArgLead, CmdLine, CursorPos)
     elseif len(l:pre_args) == 2
         return <SID>GenPathList(a:ArgLead)
     else
-        return []
+        let l:option_list = ['-D']
+        call filter(l:option_list, 'match(v:val, a:ArgLead)==0')
+        return l:option_list
     endif
 endfunction
 
