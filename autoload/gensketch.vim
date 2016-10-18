@@ -84,10 +84,22 @@ function gensketch#Call(parameters)
             break
         endif
     endfor
-    if filereadable(default_file)
-        silent execute "edit " . fnameescape(default_file)
-        if len(a:parameters) >= 3
-            silent execute "NERDTree " . fnameescape(a:parameters[2])
+    call <SID>FocusFile(default_file)
+endfunction
+
+function s:FocusFile(fname)
+    if filereadable(a:fname)
+        silent execute "edit " . fnameescape(a:fname)
+        if exists(":NERDTree")
+            " NOTE: 切分窗口之后，winnr要变化，因此稳妥的办法，是记录bufnr()
+            " bufnr('%')
+            let n = bufnr('%')
+            silent execute 'NERDTreeFocus'
+            " NERDtree并没有refesh-root的接口；
+            " 我这里是强制刷新
+            bd
+            silent execute 'NERDTreeFind'
+            silent execute bufwinnr(n) . 'wincmd w'
         endif
     endif
 endfunction
@@ -96,14 +108,12 @@ function gensketch#Edit(parameters)
     " TODO 当未提供目标名的时候，应该以当前文件夹名，为参数来提供……
     "let cmd = "genSketch qt/". a:root . " " . a:target . " " . l:out
     let path = system("genSketch --edit " . a:parameters)
-    let dir_cmd = "e"
-    if exists(":NERDTreeFind") > 0
-        let dir_cmd = "NERDTreeFind"
-    elseif exists(":NERDTree")
-        let dir_cmd = "NERDTree"
-    endif
     if len(path) > 0
-        silent execute dir_cmd . path
+        if exists(":NERDTree")
+            silent execute 'NERDTree ' . fnameescape(path)
+        else
+            silent execute 'e ' . fnameescape(path)
+        endif
         echomsg "Open dir: " . a:parameters
     else
         echomsg a:parameters . " wrong parameter!"
