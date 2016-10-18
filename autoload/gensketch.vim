@@ -1,12 +1,68 @@
 " autoload/gensketch.vim
 " Sarrow: 2016-03-19
 "
+" /usr/local/vim8/share/vim/vim80/doc/map.txt:1306
+" function {func}(ArgLead, CmdLine, CursorPos)
+" The function arguments are:
+" 	ArgLead		the leading portion of the argument currently being
+" 			completed on
+" 	CmdLine		the entire command line
+" 	CursorPos	the cursor position in it (byte index)
+" :command 的补全，对于用户来说，实际关心的是如下信息：
+" 首先，假设，该命令行的参数列表，可以按空格，划分为多个参数。
+"   1. 已经输入完毕的参数列表
+"   2. 当前正在输入的参数的前导字符——可为空串
+"   3. 当前输入位置，后续字符是否是空格——即，语义上，当前位置，是否切分了一个参数？
+function gensketch#CommandHelpComplete(ArgLead, CmdLine, CursorPos)
+    let l:pre_args = <SID>GetPreCommandArgs(a:ArgLead, a:CmdLine, a:CursorPos)
+    if empty(l:pre_args)
+        return <SID>GenMatchedTemplateName(a:ArgLead)
+    else
+        return []
+    endif
+endfunction
 
-function gensketch#CompleteRoot(A, L, P)
-    " TODO 只补全第一个参数……
-    let flist = gensketch#GetCompletsList()
-    call filter(flist, 'match(v:val, a:A)==0')
+function s:GetPreCommandArgs(ArgLead, CmdLine, CursorPos)
+    let l:pre_cmd=a:CmdLine[0:a:CursorPos-len(a:ArgLead)-1]
+    let l:pre_cmd=substitute(l:pre_cmd, '\s*$', '', 'g')
+    return split(l:pre_cmd, ' \+')[1:]
+endfunction
+
+" use template-name
+function gensketch#CommandGenComplete(ArgLead, CmdLine, CursorPos)
+    let l:pre_args = <SID>GetPreCommandArgs(a:ArgLead, a:CmdLine, a:CursorPos)
+    if empty(l:pre_args)
+        return <SID>GenMatchedTemplateName(a:ArgLead)
+    elseif len(l:pre_args) == 1
+        return []
+    elseif len(l:pre_args) == 2
+        return <SID>GenPathList(a:ArgLead)
+    else
+        return []
+    endif
+endfunction
+
+" edit template-name
+function gensketch#CommandEditComplete(ArgLead, CmdLine, CursorPos)
+    let l:pre_args = <SID>GetPreCommandArgs(a:ArgLead, a:CmdLine, a:CursorPos)
+    if len(l:pre_args) <= 1
+        return <SID>GenMatchedTemplateName(a:ArgLead)
+    else
+        return []
+    endif
+endfunction
+
+function s:GenMatchedTemplateName(ArgLead)
+    let l:flist = gensketch#GetCompletsList()
+    call filter(l:flist, 'match(v:val, a:ArgLead)==0')
     return flist
+endfunction
+
+function s:GenPathList(ArgLead)
+    let l:flist = split(globpath('.', a:ArgLead.'*/*'), "\n")
+    " remove leading './'
+    call map(l:flist, 'v:val[2:]')
+    return l:flist
 endfunction
 
 " NOTE: 不定参数见：
@@ -36,7 +92,9 @@ function gensketch#Edit(parameters)
     "let cmd = "genSketch qt/". a:root . " " . a:target . " " . l:out
     let path = system("genSketch --edit " . a:parameters)
     let dir_cmd = "e"
-    if exists(":NERDTree") > 0
+    if exists(":NERDTreeFind") > 0
+        let dir_cmd = "NERDTreeFind"
+    elseif exists(":NERDTree")
         let dir_cmd = "NERDTree"
     endif
     if len(path) > 0
