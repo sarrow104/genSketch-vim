@@ -64,8 +64,11 @@ function s:GenMatchedTemplateName(ArgLead)
 endfunction
 
 function s:GenPathList(ArgLead)
-    let l:flist = split(globpath('.', a:ArgLead.'*/*'), "\n")
-    " remove leading './'
+    " NOTE: globpath('.', '*/*')搜索的是文件！
+    " 而我补全，需要的是文件夹——纯路径；也就是说，空白的文件夹不会补全
+    " TODO
+    let l:flist = split(globpath('.', a:ArgLead.'*'), "\n")
+    call filter(l:flist, 'isdirectory(v:val)')
     call map(l:flist, 'v:val[2:]')
     return l:flist
 endfunction
